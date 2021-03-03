@@ -55,7 +55,7 @@ func printBitboard(bitboard uint64) {
 	fmt.Println("\033[31m", "  A B C D E F G H")
 }
 
-//initPosition sets the starting position for all 14 bitboards
+//initPosition sets the starting position for all 8 bitboards
 func initPosition() {
 	position.pawns = 71776119061282560
 	position.knights = 4755801206503243842
