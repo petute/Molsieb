@@ -26,6 +26,19 @@ func setBit(bitboard, square uint64) uint64 {
 	return bitboard | (1 << square)
 }
 
+//popCount counts the bits in a bitboard.
+func popCount(bitboard uint64) (count int) {
+	if bitboard != 0 && (bitboard&bitboard-1 == 0) {
+		count = 1
+	} else if bitboard != 0 {
+		for bitboard != 0 {
+			count++
+			bitboard &= bitboard - 1
+		}
+	}
+	return count
+}
+
 //printBitboard is a debug function to print every bit in a bitboard in a 8x8 square.
 func printBitboard(bitboard uint64) {
 	fmt.Printf(" Bitboard %d:\n", bitboard)
@@ -54,5 +67,23 @@ func initPosition() {
 	position.white = 18446462598732840960
 }
 
+//countMaterial counts the material for one side
+func countMaterial(color uint64) (mat int) {
+	mat += popCount(color & position.pawns)
+	mat += popCount(color&position.bishops) * 3
+	mat += popCount(color&position.knights) * 3
+	mat += popCount(color&position.rooks) * 5
+	mat += popCount(color&position.queens) * 9
+
+	return mat
+}
+
+//evaluate evaluates the position.
+func evaluate() int {
+	return countMaterial(position.white) - countMaterial(position.black)
+}
+
 func main() {
+	initPosition()
+	fmt.Println(evaluate())
 }
