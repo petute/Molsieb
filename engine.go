@@ -13,7 +13,7 @@ var position struct {
 	black   uint64
 }
 
-//getBit is a function to get a bit on a certain square.
+// getBit is a function to get a bit on a certain square.
 func getBit(bitboard, square uint64) (rgw uint64) {
 	if bitboard&(1<<square) != 0 {
 		rgw = 1
@@ -29,10 +29,12 @@ func setBit(bitboard, square uint64) uint64 {
 // popBit sets a bit on a certain square from 1 to 0.
 func popBit(bitboard, square uint64) uint64 {
 	if getBit(bitboard, square) != 0 {
-		return bitboard ^ (1 << square)
+		bitboard ^= (1 << square)
 	}
 	return bitboard
 }
+
+// popCount counts the bits in a bitboard.
 func popCount(bitboard uint64) (count int) {
 	if bitboard != 0 && (bitboard&bitboard-1 == 0) {
 		count = 1
@@ -45,7 +47,7 @@ func popCount(bitboard uint64) (count int) {
 	return count
 }
 
-//printBitboard is a debug function to print every bit in a bitboard in a 8x8 square.
+// printBitboard is a debug function to print every bit in a bitboard in a 8x8 square.
 func printBitboard(bitboard uint64) {
 	fmt.Printf(" Bitboard %d:\n", bitboard)
 	for rank := uint64(0); rank < 8; rank++ {
@@ -61,7 +63,7 @@ func printBitboard(bitboard uint64) {
 	fmt.Println("\033[31m", "  A B C D E F G H")
 }
 
-//initPosition sets the starting position for all 8 bitboards
+// initPosition sets the starting position for all 8 bitboards.
 func initPosition() {
 	position.pawns = 71776119061282560
 	position.knights = 4755801206503243842
@@ -73,7 +75,7 @@ func initPosition() {
 	position.white = 18446462598732840960
 }
 
-//countMaterial counts the material for one side
+// countMaterial counts the material for one side.
 func countMaterial(color uint64) (mat int) {
 	mat += popCount(color & position.pawns)
 	mat += popCount(color&position.bishops) * 3
@@ -84,12 +86,16 @@ func countMaterial(color uint64) (mat int) {
 	return mat
 }
 
-//evaluate evaluates the position.
+// evaluate evaluates the position.
 func evaluate() int {
 	return countMaterial(position.white) - countMaterial(position.black)
 }
 
 func main() {
-	initPosition()
-	fmt.Println(evaluate())
+	var pawnAttacks = GeneratePawnAttacks()
+	printBitboard(pawnAttacks[1][8])
+	printBitboard(pawnAttacks[1][15])
+
+	printBitboard(pawnAttacks[0][8])
+	printBitboard(pawnAttacks[0][15])
 }
