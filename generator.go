@@ -9,8 +9,8 @@ var (
 
 // <<-------------------------------- Attacks -------------------------------->>
 
-// GeneratePawnAttacks generates all possible attacks for pawns.
-func GeneratePawnAttacks() (pawnAttacks [2][64]uint64) {
+// MaskPawnAttacks generates all possible attacks for pawns.
+func maskPawnAttacks() (pawnAttacks [2][64]uint64) {
 	for i := uint64(0); i < 64; i++ {
 		pawnAttacks[0][i] = setBit(0, i)
 		pawnAttacks[0][i] = (pawnAttacks[0][i]&notAFile)>>7 ^ (pawnAttacks[0][i]&notHFile)>>9
@@ -21,18 +21,34 @@ func GeneratePawnAttacks() (pawnAttacks [2][64]uint64) {
 	return pawnAttacks
 }
 
-// GenerateKnightAttacks generates all possible attacks for knights.
-func GenerateKnightAttacks() (knightAttacks [64]uint64) {
+// MaskKnightMoves generates all possible moves for knights.
+func maskKnightMoves() (knightMoves [64]uint64) {
 	for i := uint64(0); i < 64; i++ {
-		knightAttacks[i] = setBit(0, i)
-		knightAttacks[i] = ((knightAttacks[i])>>6)&notGHFile ^
-			((knightAttacks[i] >> 10) & notABFile) ^
-			((knightAttacks[i] << 6) & notABFile) ^
-			((knightAttacks[i] << 10) & notGHFile) ^
-			((knightAttacks[i] >> 17) & notAFile) ^
-			((knightAttacks[i] >> 15) & notHFile) ^
-			((knightAttacks[i] << 17) & notHFile) ^
-			((knightAttacks[i] << 15) & notAFile)
+		knightMoves[i] = setBit(0, i)
+		knightMoves[i] = (((knightMoves[i] >> 6) & notGHFile) ^
+			((knightMoves[i] >> 10) & notABFile) ^
+			((knightMoves[i] << 6) & notABFile) ^
+			((knightMoves[i] << 10) & notGHFile) ^
+			((knightMoves[i] >> 17) & notAFile) ^
+			((knightMoves[i] >> 15) & notHFile) ^
+			((knightMoves[i] << 17) & notHFile) ^
+			((knightMoves[i] << 15) & notAFile))
 	}
-	return knightAttacks
+	return knightMoves
+}
+
+// MaskKingMoves generates all possible moves for kings.
+func maskKingMoves() (kingMoves [64]uint64) {
+	for i := uint64(0); i < 64; i++ {
+		kingMoves[i] = setBit(0, i)
+		kingMoves[i] = (((kingMoves[i] >> 1) & notAFile) ^
+			((kingMoves[i] >> 9) & notAFile) ^
+			((kingMoves[i] << 7) & notAFile) ^
+			(kingMoves[i] >> 8) ^
+			(kingMoves[i] << 8) ^
+			((kingMoves[i] >> 7) & notHFile) ^
+			((kingMoves[i] << 1) & notHFile) ^
+			((kingMoves[i] << 9) & notHFile))
+	}
+	return kingMoves
 }
