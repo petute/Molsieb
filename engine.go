@@ -21,12 +21,18 @@ func getBit(bitboard, square uint64) (rgw uint64) {
 	return rgw
 }
 
-//setBit sets a bit on a certain square to 1.
+// setBit sets a bit on a certain square 1.
 func setBit(bitboard, square uint64) uint64 {
 	return bitboard | (1 << square)
 }
 
-//popCount counts the bits in a bitboard.
+// popBit sets a bit on a certain square from 1 to 0.
+func popBit(bitboard, square uint64) uint64 {
+	if getBit(bitboard, square) != 0 {
+		return bitboard ^ (1 << square)
+	}
+	return bitboard
+}
 func popCount(bitboard uint64) (count int) {
 	if bitboard != 0 && (bitboard&bitboard-1 == 0) {
 		count = 1
