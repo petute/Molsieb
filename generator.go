@@ -7,7 +7,7 @@ var (
 	notGHFile uint64 = 18229723555195321596
 )
 
-// <<-------------------------------- Attacks -------------------------------->>
+// <<-------------------------------- Masks -------------------------------->>
 
 // MaskPawnAttacks generates all possible attacks for pawns.
 func maskPawnAttacks() (pawnAttacks [2][64]uint64) {

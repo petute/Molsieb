@@ -2,17 +2,6 @@ package main
 
 import "fmt"
 
-var position struct {
-	pawns   uint64
-	knights uint64
-	bishops uint64
-	rooks   uint64
-	queens  uint64
-	kings   uint64
-	white   uint64
-	black   uint64
-}
-
 // getBit is a function to get a bit on a certain square.
 func getBit(bitboard, square uint64) (rgw uint64) {
 	if bitboard&(1<<square) != 0 {
@@ -61,41 +50,4 @@ func printBitboard(bitboard uint64) {
 		fmt.Printf("\n")
 	}
 	fmt.Println("\033[31m", "  A B C D E F G H")
-}
-
-// initPosition sets the starting position for all 8 bitboards.
-func initPosition() {
-	position.pawns = 71776119061282560
-	position.knights = 4755801206503243842
-	position.bishops = 2594073385365405732
-	position.rooks = 9295429630892703873
-	position.kings = 1152921504606846992
-	position.queens = 576460752303423496
-	position.black = 65535
-	position.white = 18446462598732840960
-}
-
-// countMaterial counts the material for one side.
-func countMaterial(color uint64) (mat int) {
-	mat += popCount(color & position.pawns)
-	mat += popCount(color&position.bishops) * 3
-	mat += popCount(color&position.knights) * 3
-	mat += popCount(color&position.rooks) * 5
-	mat += popCount(color&position.queens) * 9
-
-	return mat
-}
-
-// evaluate evaluates the position.
-func evaluate() int {
-	return countMaterial(position.white) - countMaterial(position.black)
-}
-
-func main() {
-	var pawnAttacks = GeneratePawnAttacks()
-	printBitboard(pawnAttacks[1][8])
-	printBitboard(pawnAttacks[1][15])
-
-	printBitboard(pawnAttacks[0][8])
-	printBitboard(pawnAttacks[0][15])
 }
