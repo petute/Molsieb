@@ -52,3 +52,27 @@ func maskKingMoves() (kingMoves [64]uint64) {
 	}
 	return kingMoves
 }
+
+// maskBishopMoves generates all relevant occupancy bits of bishops for magic bitboards.
+func maskBishopMoves() (bishopMoves [64]uint64) {
+	var rank, file int
+
+	for i := 0; i < 64; i++ {
+		rank = i / 8
+		file = i % 8
+
+		for r, f := rank+1, file+1; r <= 6 && f <= 6; r, f = r+1, f+1 {
+			bishopMoves[i] |= (1 << (r*8 + f))
+		}
+		for r, f := rank-1, file+1; r >= 1 && f <= 6; r, f = r-1, f+1 {
+			bishopMoves[i] |= (1 << (r*8 + f))
+		}
+		for r, f := rank+1, file-1; r <= 6 && f >= 1; r, f = r+1, f-1 {
+			bishopMoves[i] |= (1 << (r*8 + f))
+		}
+		for r, f := rank-1, file-1; r >= 1 && f >= 1; r, f = r-1, f-1 {
+			bishopMoves[i] |= (1 << (r*8 + f))
+		}
+	}
+	return bishopMoves
+}
