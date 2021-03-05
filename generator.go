@@ -101,3 +101,44 @@ func maskBishopMoves() (bishopMoves [64]uint64) {
 	}
 	return bishopMoves
 }
+
+// generateRookMovesOnTheFly generates the rook moves for a certain blockboard (position).
+func generateRookMovesOnTheFly(square int, blockboard uint64) (rookMoves uint64) {
+	var rank, file int
+
+	rank = square / 8
+	file = square % 8
+
+	for r := rank + 1; r <= 7; r++ {
+
+		if (1<<(r*8+file))&blockboard != 0 {
+			break
+		} else {
+			rookMoves |= (1 << (r*8 + file))
+		}
+	}
+	for r := rank - 1; r >= 0; r-- {
+		if (1<<(r*8+file))&blockboard != 0 {
+			break
+		} else {
+			rookMoves |= (1 << (r*8 + file))
+		}
+	}
+	for f := file + 1; f <= 7; f++ {
+		if (1<<(rank*8+f))&blockboard != 0 {
+			break
+		} else {
+			rookMoves |= (1 << (rank*8 + f))
+		}
+	}
+	for f := file - 1; f >= 0; f-- {
+		if (1<<(rank*8+f))&blockboard != 0 {
+			break
+		} else {
+			rookMoves |= (1 << (rank*8 + f))
+		}
+	}
+
+	return rookMoves
+}
+
