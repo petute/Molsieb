@@ -23,6 +23,15 @@ func popBit(bitboard, square uint64) uint64 {
 	return bitboard
 }
 
+// getLS1BIndex returns the index of the least significant bit.
+func getLS1BIndex(bitboard uint64) int {
+	rgw := -1
+	if bitboard != 0 {
+		rgw = popCount((bitboard & -bitboard) - 1)
+	}
+	return rgw
+}
+
 // popCount counts the bits in a bitboard.
 func popCount(bitboard uint64) (count int) {
 	if bitboard != 0 && (bitboard&bitboard-1 == 0) {
