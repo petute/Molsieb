@@ -9,7 +9,7 @@ var (
 
 // <<-------------------------------- Masks -------------------------------->>
 
-// MaskPawnAttacks generates all possible attacks for pawns.
+// maskPawnAttacks generates all possible attacks for pawns.
 func maskPawnAttacks() (pawnAttacks [2][64]uint64) {
 	for i := uint64(0); i < 64; i++ {
 		pawnAttacks[0][i] = setBit(0, i)
@@ -21,7 +21,7 @@ func maskPawnAttacks() (pawnAttacks [2][64]uint64) {
 	return pawnAttacks
 }
 
-// MaskKnightMoves generates all possible moves for knights.
+// maskKnightMoves generates all possible moves for knights.
 func maskKnightMoves() (knightMoves [64]uint64) {
 	for i := uint64(0); i < 64; i++ {
 		knightMoves[i] = setBit(0, i)
@@ -37,7 +37,7 @@ func maskKnightMoves() (knightMoves [64]uint64) {
 	return knightMoves
 }
 
-// MaskKingMoves generates all possible moves for kings.
+// maskKingMoves generates all possible moves for kings.
 func maskKingMoves() (kingMoves [64]uint64) {
 	for i := uint64(0); i < 64; i++ {
 		kingMoves[i] = setBit(0, i)
@@ -51,6 +51,31 @@ func maskKingMoves() (kingMoves [64]uint64) {
 			((kingMoves[i] << 9) & notHFile))
 	}
 	return kingMoves
+}
+
+// maskRookMoves generates all relevant occupancy bits of rooks for magic bitboards.
+func maskRookMoves() (rookMoves [64]uint64) {
+	var rank, file int
+
+	for i := 0; i < 64; i++ {
+		rank = i / 8
+		file = i % 8
+
+		for r := rank + 1; r <= 6; r++ {
+			rookMoves[i] |= (1 << (r*8 + file))
+		}
+		for r := rank - 1; r >= 1; r-- {
+			rookMoves[i] |= (1 << (r*8 + file))
+		}
+		for f := file + 1; f <= 6; f++ {
+			rookMoves[i] |= (1 << (rank*8 + f))
+		}
+		for f := file - 1; f >= 1; f-- {
+			rookMoves[i] |= (1 << (rank*8 + f))
+		}
+	}
+
+	return rookMoves
 }
 
 // maskBishopMoves generates all relevant occupancy bits of bishops for magic bitboards.
