@@ -110,7 +110,6 @@ func generateRookMovesOnTheFly(square int, blockboard uint64) (rookMoves uint64)
 	file = square % 8
 
 	for r := rank + 1; r <= 7; r++ {
-
 		if (1<<(r*8+file))&blockboard != 0 {
 			break
 		} else {
@@ -142,6 +141,7 @@ func generateRookMovesOnTheFly(square int, blockboard uint64) (rookMoves uint64)
 	return rookMoves
 }
 
+// generateBishopMovesOnTheFly generates the bishop moves for a certain blockboard (position).
 func generateBishopMovesOnTheFly(square int, blockboard uint64) (bishopMoves uint64) {
 	var rank, file int
 
