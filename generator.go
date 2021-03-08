@@ -110,31 +110,28 @@ func generateRookMovesOnTheFly(square int, blockboard uint64) (rookMoves uint64)
 	file = square % 8
 
 	for r := rank + 1; r <= 7; r++ {
+		rookMoves |= (1 << (r*8 + file))
 		if (1<<(r*8+file))&blockboard != 0 {
 			break
-		} else {
-			rookMoves |= (1 << (r*8 + file))
 		}
 	}
 	for r := rank - 1; r >= 0; r-- {
+		rookMoves |= (1 << (r*8 + file))
 		if (1<<(r*8+file))&blockboard != 0 {
 			break
-		} else {
-			rookMoves |= (1 << (r*8 + file))
 		}
+
 	}
 	for f := file + 1; f <= 7; f++ {
+		rookMoves |= (1 << (rank*8 + f))
 		if (1<<(rank*8+f))&blockboard != 0 {
 			break
-		} else {
-			rookMoves |= (1 << (rank*8 + f))
 		}
 	}
 	for f := file - 1; f >= 0; f-- {
+		rookMoves |= (1 << (rank*8 + f))
 		if (1<<(rank*8+f))&blockboard != 0 {
 			break
-		} else {
-			rookMoves |= (1 << (rank*8 + f))
 		}
 	}
 
@@ -149,31 +146,27 @@ func generateBishopMovesOnTheFly(square int, blockboard uint64) (bishopMoves uin
 	file = square % 8
 
 	for r, f := rank+1, file+1; r <= 7 && f <= 7; r, f = r+1, f+1 {
+		bishopMoves |= (1 << (r*8 + f))
 		if (1<<(r*8+f))&blockboard != 0 {
 			break
-		} else {
-			bishopMoves |= (1 << (r*8 + f))
 		}
 	}
 	for r, f := rank-1, file+1; r >= 0 && f <= 7; r, f = r-1, f+1 {
+		bishopMoves |= (1 << (r*8 + f))
 		if (1<<(r*8+f))&blockboard != 0 {
 			break
-		} else {
-			bishopMoves |= (1 << (r*8 + f))
 		}
 	}
 	for r, f := rank+1, file-1; r <= 7 && f >= 0; r, f = r+1, f-1 {
+		bishopMoves |= (1 << (r*8 + f))
 		if (1<<(r*8+f))&blockboard != 0 {
 			break
-		} else {
-			bishopMoves |= (1 << (r*8 + f))
 		}
 	}
 	for r, f := rank-1, file-1; r >= 0 && f >= 0; r, f = r-1, f-1 {
+		bishopMoves |= (1 << (r*8 + f))
 		if (1<<(r*8+f))&blockboard != 0 {
 			break
-		} else {
-			bishopMoves |= (1 << (r*8 + f))
 		}
 	}
 	return bishopMoves
