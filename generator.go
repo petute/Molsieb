@@ -187,6 +187,8 @@ func generateBishopMovesOnTheFly(square int, blockboard uint64) (bishopMoves uin
 	return bishopMoves
 }
 
+// <<-------------------------------- Magic -------------------------------->>
+
 // setOccupancy generates the relevant occupancy bitboard for a given rook or bishop moves bitboard.
 func setOccupancy(bitsInMask, index int, moveMask uint64) (occupancy uint64) {
 	for i := 0; i < bitsInMask; i++ {
@@ -198,4 +200,17 @@ func setOccupancy(bitsInMask, index int, moveMask uint64) (occupancy uint64) {
 		}
 	}
 	return occupancy
+}
+
+// getRandomNumber generates pseudoRandom numbers (XORSHIFT32) for the magic to happen.
+func getRandomNumber(state *uint32) uint32 {
+	number := *state
+
+	number ^= number << 13
+	number ^= number >> 17
+	number ^= number << 5
+
+	*state = number
+
+	return number
 }
