@@ -171,3 +171,16 @@ func generateBishopMovesOnTheFly(square int, blockboard uint64) (bishopMoves uin
 	}
 	return bishopMoves
 }
+
+// setOccupancy generates the relevant occupancy bitboard for a given rook or bishop moves bitboard.
+func setOccupancy(bitsInMask, index int, moveMask uint64) (occupancy uint64) {
+	for i := 0; i < bitsInMask; i++ {
+		var square = getLS1BIndex(moveMask)
+		moveMask = popBit(moveMask, square)
+
+		if index&(1<<square) != 0 {
+			occupancy = (1 << square)
+		}
+	}
+	return occupancy
+}

@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 // getBit is a function to get a bit on a certain square.
-func getBit(bitboard, square uint64) (rgw uint64) {
+func getBit(bitboard uint64, square int) (rgw uint64) {
 	if bitboard&(1<<square) != 0 {
 		rgw = 1
 	}
@@ -11,12 +11,12 @@ func getBit(bitboard, square uint64) (rgw uint64) {
 }
 
 // setBit sets a bit on a certain square 1.
-func setBit(bitboard, square uint64) uint64 {
+func setBit(bitboard uint64, square int) uint64 {
 	return bitboard | (1 << square)
 }
 
 // popBit sets a bit on a certain square from 1 to 0.
-func popBit(bitboard, square uint64) uint64 {
+func popBit(bitboard uint64, square int) uint64 {
 	if getBit(bitboard, square) != 0 {
 		bitboard ^= (1 << square)
 	}
