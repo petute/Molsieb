@@ -7,6 +7,30 @@ var (
 	notGHFile uint64 = 18229723555195321596
 )
 
+// Amount oft relevant occupancy bits per square for the bishop.
+var relevantBitsBishop = [64]int{
+	6, 5, 5, 5, 5, 5, 5, 6,
+	5, 5, 5, 5, 5, 5, 5, 5,
+	5, 5, 7, 7, 7, 7, 5, 5,
+	5, 5, 7, 9, 9, 7, 5, 5,
+	5, 5, 7, 9, 9, 7, 5, 5,
+	5, 5, 7, 7, 7, 7, 5, 5,
+	5, 5, 5, 5, 5, 5, 5, 5,
+	6, 5, 5, 5, 5, 5, 5, 6,
+}
+
+// Amount oft relevant occupancy bits per square for the rook.
+var relevantBitsRook = [64]int{
+	12, 11, 11, 11, 11, 11, 11, 12,
+	11, 10, 10, 10, 10, 10, 10, 11,
+	11, 10, 10, 10, 10, 10, 10, 11,
+	11, 10, 10, 10, 10, 10, 10, 11,
+	11, 10, 10, 10, 10, 10, 10, 11,
+	11, 10, 10, 10, 10, 10, 10, 11,
+	11, 10, 10, 10, 10, 10, 10, 11,
+	12, 11, 11, 11, 11, 11, 11, 12,
+}
+
 // <<-------------------------------- Masks -------------------------------->>
 
 // maskPawnAttacks generates all possible attacks for pawns.
