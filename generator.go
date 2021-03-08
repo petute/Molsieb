@@ -11,7 +11,7 @@ var (
 
 // maskPawnAttacks generates all possible attacks for pawns.
 func maskPawnAttacks() (pawnAttacks [2][64]uint64) {
-	for i := uint64(0); i < 64; i++ {
+	for i := 0; i < 64; i++ {
 		pawnAttacks[0][i] = setBit(0, i)
 		pawnAttacks[0][i] = (pawnAttacks[0][i]&notAFile)>>7 ^ (pawnAttacks[0][i]&notHFile)>>9
 
@@ -23,7 +23,7 @@ func maskPawnAttacks() (pawnAttacks [2][64]uint64) {
 
 // maskKnightMoves generates all possible moves for knights.
 func maskKnightMoves() (knightMoves [64]uint64) {
-	for i := uint64(0); i < 64; i++ {
+	for i := 0; i < 64; i++ {
 		knightMoves[i] = setBit(0, i)
 		knightMoves[i] = (((knightMoves[i] >> 6) & notGHFile) ^
 			((knightMoves[i] >> 10) & notABFile) ^
@@ -39,7 +39,7 @@ func maskKnightMoves() (knightMoves [64]uint64) {
 
 // maskKingMoves generates all possible moves for kings.
 func maskKingMoves() (kingMoves [64]uint64) {
-	for i := uint64(0); i < 64; i++ {
+	for i := 0; i < 64; i++ {
 		kingMoves[i] = setBit(0, i)
 		kingMoves[i] = (((kingMoves[i] >> 1) & notAFile) ^
 			((kingMoves[i] >> 9) & notAFile) ^
@@ -178,8 +178,8 @@ func setOccupancy(bitsInMask, index int, moveMask uint64) (occupancy uint64) {
 		var square = getLS1BIndex(moveMask)
 		moveMask = popBit(moveMask, square)
 
-		if index&(1<<square) != 0 {
-			occupancy = (1 << square)
+		if index&(1<<i) != 0 {
+			occupancy |= (1 << square)
 		}
 	}
 	return occupancy

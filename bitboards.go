@@ -48,8 +48,8 @@ func popCount(bitboard uint64) (count int) {
 // printBitboard is a debug function to print every bit in a bitboard in a 8x8 square.
 func printBitboard(bitboard uint64) {
 	fmt.Printf(" Bitboard %d:\n", bitboard)
-	for rank := uint64(0); rank < 8; rank++ {
-		for file := uint64(0); file < 8; file++ {
+	for rank := 0; rank < 8; rank++ {
+		for file := 0; file < 8; file++ {
 			if file == 0 {
 				fmt.Printf("\033[31m %d\033[0m", 8-rank)
 			}
