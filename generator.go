@@ -22,84 +22,75 @@ func maskPawnAttacks() (pawnAttacks [2][64]uint64) {
 }
 
 // maskKnightMoves generates all possible moves for knights.
-func maskKnightMoves() (knightMoves [64]uint64) {
-	for i := 0; i < 64; i++ {
-		knightMoves[i] = setBit(0, i)
-		knightMoves[i] = (((knightMoves[i] >> 6) & notGHFile) ^
-			((knightMoves[i] >> 10) & notABFile) ^
-			((knightMoves[i] << 6) & notABFile) ^
-			((knightMoves[i] << 10) & notGHFile) ^
-			((knightMoves[i] >> 17) & notAFile) ^
-			((knightMoves[i] >> 15) & notHFile) ^
-			((knightMoves[i] << 17) & notHFile) ^
-			((knightMoves[i] << 15) & notAFile))
-	}
-	return knightMoves
+func maskKnightMoves(square int) (knightMove uint64) {
+	knightMove = setBit(0, square)
+	knightMove = (((knightMove >> 6) & notGHFile) ^
+		((knightMove >> 10) & notABFile) ^
+		((knightMove << 6) & notABFile) ^
+		((knightMove << 10) & notGHFile) ^
+		((knightMove >> 17) & notAFile) ^
+		((knightMove >> 15) & notHFile) ^
+		((knightMove << 17) & notHFile) ^
+		((knightMove << 15) & notAFile))
+
+	return knightMove
 }
 
 // maskKingMoves generates all possible moves for kings.
-func maskKingMoves() (kingMoves [64]uint64) {
-	for i := 0; i < 64; i++ {
-		kingMoves[i] = setBit(0, i)
-		kingMoves[i] = (((kingMoves[i] >> 1) & notAFile) ^
-			((kingMoves[i] >> 9) & notAFile) ^
-			((kingMoves[i] << 7) & notAFile) ^
-			(kingMoves[i] >> 8) ^
-			(kingMoves[i] << 8) ^
-			((kingMoves[i] >> 7) & notHFile) ^
-			((kingMoves[i] << 1) & notHFile) ^
-			((kingMoves[i] << 9) & notHFile))
-	}
-	return kingMoves
+func maskKingMoves(square int) (kingMove uint64) {
+	kingMove = setBit(0, square)
+	kingMove = (((kingMove >> 1) & notAFile) ^
+		((kingMove >> 9) & notAFile) ^
+		((kingMove << 7) & notAFile) ^
+		(kingMove >> 8) ^
+		(kingMove << 8) ^
+		((kingMove >> 7) & notHFile) ^
+		((kingMove << 1) & notHFile) ^
+		((kingMove << 9) & notHFile))
+
+	return kingMove
 }
 
 // maskRookMoves generates all relevant occupancy bits of rooks for magic bitboards.
-func maskRookMoves() (rookMoves [64]uint64) {
-	var rank, file int
+func maskRookMoves(square int) (rookMove uint64) {
+	rank := square / 8
+	file := square % 8
 
-	for i := 0; i < 64; i++ {
-		rank = i / 8
-		file = i % 8
-
-		for r := rank + 1; r <= 6; r++ {
-			rookMoves[i] |= (1 << (r*8 + file))
-		}
-		for r := rank - 1; r >= 1; r-- {
-			rookMoves[i] |= (1 << (r*8 + file))
-		}
-		for f := file + 1; f <= 6; f++ {
-			rookMoves[i] |= (1 << (rank*8 + f))
-		}
-		for f := file - 1; f >= 1; f-- {
-			rookMoves[i] |= (1 << (rank*8 + f))
-		}
+	for r := rank + 1; r <= 6; r++ {
+		rookMove |= (1 << (r*8 + file))
+	}
+	for r := rank - 1; r >= 1; r-- {
+		rookMove |= (1 << (r*8 + file))
+	}
+	for f := file + 1; f <= 6; f++ {
+		rookMove |= (1 << (rank*8 + f))
+	}
+	for f := file - 1; f >= 1; f-- {
+		rookMove |= (1 << (rank*8 + f))
 	}
 
-	return rookMoves
+	return rookMove
 }
 
 // maskBishopMoves generates all relevant occupancy bits of bishops for magic bitboards.
-func maskBishopMoves() (bishopMoves [64]uint64) {
-	var rank, file int
+func maskBishopMoves(square int) (bishopMove uint64) {
+	rank := square / 8
+	file := square % 8
 
-	for i := 0; i < 64; i++ {
-		rank = i / 8
-		file = i % 8
-
-		for r, f := rank+1, file+1; r <= 6 && f <= 6; r, f = r+1, f+1 {
-			bishopMoves[i] |= (1 << (r*8 + f))
-		}
-		for r, f := rank-1, file+1; r >= 1 && f <= 6; r, f = r-1, f+1 {
-			bishopMoves[i] |= (1 << (r*8 + f))
-		}
-		for r, f := rank+1, file-1; r <= 6 && f >= 1; r, f = r+1, f-1 {
-			bishopMoves[i] |= (1 << (r*8 + f))
-		}
-		for r, f := rank-1, file-1; r >= 1 && f >= 1; r, f = r-1, f-1 {
-			bishopMoves[i] |= (1 << (r*8 + f))
-		}
+	for r, f := rank+1, file+1; r <= 6 && f <= 6; r, f = r+1, f+1 {
+		bishopMove |= (1 << (r*8 + f))
 	}
-	return bishopMoves
+	for r, f := rank-1, file+1; r >= 1 && f <= 6; r, f = r-1, f+1 {
+		bishopMove |= (1 << (r*8 + f))
+	}
+	for r, f := rank+1, file-1; r <= 6 && f >= 1; r, f = r+1, f-1 {
+		bishopMove |= (1 << (r*8 + f))
+	}
+	for r, f := rank-1, file-1; r >= 1 && f >= 1; r, f = r-1, f-1 {
+		bishopMove |= (1 << (r*8 + f))
+	}
+
+	return bishopMove
 }
 
 // generateRookMovesOnTheFly generates the rook moves for a certain blockboard (position).
