@@ -31,7 +31,7 @@ var relevantBitsRook = [64]int{
 	12, 11, 11, 11, 11, 11, 11, 12,
 }
 
-// <<-------------------------------- Masks -------------------------------->>
+// <<--------------------------------- Masks --------------------------------->>
 
 // maskPawnAttacks generates all possible attacks for pawns.
 func maskPawnAttacks() (pawnAttacks [2][64]uint64) {
@@ -187,12 +187,12 @@ func generateBishopMovesOnTheFly(square int, blockboard uint64) (bishopMoves uin
 	return bishopMoves
 }
 
-// <<-------------------------------- Magic -------------------------------->>
+// <<--------------------------------- Magic --------------------------------->>
 
 // setOccupancy generates the relevant occupancy bitboard for a given rook or bishop moves bitboard.
 func setOccupancy(bitsInMask, index int, moveMask uint64) (occupancy uint64) {
 	for i := 0; i < bitsInMask; i++ {
-		var square = getLS1BIndex(moveMask)
+		square := getLS1BIndex(moveMask)
 		moveMask = popBit(moveMask, square)
 
 		if index&(1<<i) != 0 {
@@ -202,15 +202,18 @@ func setOccupancy(bitsInMask, index int, moveMask uint64) (occupancy uint64) {
 	return occupancy
 }
 
-// getRandomNumber generates pseudoRandom numbers (XORSHIFT32) for the magic to happen.
-func getRandomNumber(state *uint32) uint32 {
-	number := *state
+// state is used to generate the random numbers.
+var state uint32 = 1804289383
+
+// getRandomNumber generates pseudoRandom numbers (XORSHIFT32).
+func getRandomNumber() uint32 {
+	number := state
 
 	number ^= number << 13
 	number ^= number >> 17
 	number ^= number << 5
 
-	*state = number
+	state = number
 
 	return number
 }
@@ -225,4 +228,9 @@ func getRandom64BitNumber() uint64 {
 	n4 = uint64(getRandomNumber() & 0xFFFF)
 
 	return n1 | (n2 << 16) | (n3 << 32) | (n4 << 48)
+}
+
+// generateMagicNumber generates a magic number candidate.
+func generateMagicNumber() uint64 {
+	return getRandom64BitNumber() & getRandom64BitNumber() & getRandom64BitNumber()
 }
