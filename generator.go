@@ -214,3 +214,15 @@ func getRandomNumber(state *uint32) uint32 {
 
 	return number
 }
+
+// getRandom64BitNumber generates a random 64 bit pseudo legal number.
+func getRandom64BitNumber() uint64 {
+	var n1, n2, n3, n4 uint64
+
+	n1 = uint64(getRandomNumber() & 0xFFFF)
+	n2 = uint64(getRandomNumber() & 0xFFFF)
+	n3 = uint64(getRandomNumber() & 0xFFFF)
+	n4 = uint64(getRandomNumber() & 0xFFFF)
+
+	return n1 | (n2 << 16) | (n3 << 32) | (n4 << 48)
+}
