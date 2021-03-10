@@ -23,6 +23,7 @@ Priority of implementation:
 ### [Move generation](https://www.chessprogramming.org/Move_Generation#Bitboards)
 
 - [magic bitboards](https://www.chessprogramming.org/Magic_Bitboards)
+- [Magic Move-Bitboard Generation in Computer Chess](http://pradu.us/old/Nov27_2008/Buzz/research/magic/Bitboards.pdf) by Pradyumna Kannan
 
 ### [Move evaluation](https://www.chessprogramming.org/Evaluation)
 - **M**
