@@ -430,3 +430,17 @@ func initMagicNumbers() {
 		fmt.Printf("%d,\n", findMagicNumber(i, relevantBitsBishop[i], true))
 	}
 }
+
+// <<------------------------------- initMoves ------------------------------->>
+
+var pawnAttacks [2][64]uint64
+var knightAttacks [64]uint64
+var kingAttacks [64]uint64
+
+func initLeaperAttacks() {
+	pawnAttacks = maskPawnAttacks()
+	for i := 0; i < 64; i++ {
+		knightAttacks[i] = maskKnightMoves(i)
+		kingAttacks[i] = maskKingMoves(i)
+	}
+}
