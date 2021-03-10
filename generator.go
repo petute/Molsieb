@@ -205,7 +205,7 @@ func setOccupancy(bitsInMask, index int, moveMask uint64) (occupancy uint64) {
 // state is used to generate the random numbers.
 var state uint32 = 1804289383
 
-// getRandomNumber generates pseudoRandom numbers (XORSHIFT32).
+// getRandom32BitNumber generates pseudoRandom numbers (XORSHIFT32).
 func getRandom32BitNumber() uint32 {
 	number := state
 
@@ -224,11 +224,6 @@ func getRandom64BitNumber() uint64 {
 	n2 := uint64(getRandom32BitNumber()) & 0xFFFF
 	n3 := uint64(getRandom32BitNumber()) & 0xFFFF
 	n4 := uint64(getRandom32BitNumber()) & 0xFFFF
-
-	n1 = uint64(getRandomNumber() & 0xFFFF)
-	n2 = uint64(getRandomNumber() & 0xFFFF)
-	n3 = uint64(getRandomNumber() & 0xFFFF)
-	n4 = uint64(getRandomNumber() & 0xFFFF)
 
 	return n1 | (n2 << 16) | (n3 << 32) | (n4 << 48)
 }
@@ -286,4 +281,18 @@ func findMagicNumber(square, relevantBits int, bishop bool) uint64 {
 		}
 	}
 	return 0
+}
+
+var magicNumberRook [64]uint64
+var magicNumberBishop [64]uint64
+
+// initMagicNumbers initalizes the magicnumbers.
+func initMagicNumbers() {
+
+	for i := 0; i < 64; i++ {
+		magicNumberRook[i] = findMagicNumber(i, relevantBitsRook[i], false)
+	}
+	for i := 0; i < 64; i++ {
+		magicNumberBishop[i] = findMagicNumber(i, relevantBitsBishop[i], true)
+	}
 }
