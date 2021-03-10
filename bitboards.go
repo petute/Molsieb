@@ -17,10 +17,7 @@ func setBit(bitboard uint64, square int) uint64 {
 
 // popBit sets a bit on a certain square from 1 to 0.
 func popBit(bitboard uint64, square int) uint64 {
-	if getBit(bitboard, square) != 0 {
-		bitboard ^= (1 << square)
-	}
-	return bitboard
+	return bitboard & ^(1 << square)
 }
 
 // getLS1BIndex returns the index of the least significant bit.
@@ -58,5 +55,5 @@ func printBitboard(bitboard uint64) {
 		}
 		fmt.Printf("\n")
 	}
-	fmt.Println("\033[31m", "  A B C D E F G H")
+	fmt.Println("\033[31m", "  A B C D E F G H\033[0m")
 }

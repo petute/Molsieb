@@ -206,7 +206,7 @@ func setOccupancy(bitsInMask, index int, moveMask uint64) (occupancy uint64) {
 var state uint32 = 1804289383
 
 // getRandomNumber generates pseudoRandom numbers (XORSHIFT32).
-func getRandomNumber() uint32 {
+func getRandom32BitNumber() uint32 {
 	number := state
 
 	number ^= number << 13
@@ -218,9 +218,12 @@ func getRandomNumber() uint32 {
 	return number
 }
 
-// getRandom64BitNumber generates a random 64 bit pseudo legal number.
+// getRandom64BitNumber generates a random 64 bit pseudo legal number. (FFFF == 65535 == 16 bits)
 func getRandom64BitNumber() uint64 {
-	var n1, n2, n3, n4 uint64
+	n1 := uint64(getRandom32BitNumber()) & 0xFFFF
+	n2 := uint64(getRandom32BitNumber()) & 0xFFFF
+	n3 := uint64(getRandom32BitNumber()) & 0xFFFF
+	n4 := uint64(getRandom32BitNumber()) & 0xFFFF
 
 	n1 = uint64(getRandomNumber() & 0xFFFF)
 	n2 = uint64(getRandomNumber() & 0xFFFF)
@@ -233,4 +236,54 @@ func getRandom64BitNumber() uint64 {
 // generateMagicNumber generates a magic number candidate.
 func generateMagicNumber() uint64 {
 	return getRandom64BitNumber() & getRandom64BitNumber() & getRandom64BitNumber()
+}
+
+// findMagicNumber checks whether a magic number candidate is viable.
+func findMagicNumber(square, relevantBits int, bishop bool) uint64 {
+	var (
+		occupancies [4096]uint64
+		attacks     [4096]uint64
+		attackMask  uint64
+	)
+	if bishop {
+		attackMask = maskBishopMoves(square)
+	} else {
+		attackMask = maskRookMoves(square)
+	}
+	occupancyIndizes := 1 << relevantBits
+
+	for i := 0; i < occupancyIndizes; i++ {
+		occupancies[i] = setOccupancy(relevantBits, i, attackMask)
+
+		if bishop {
+			attacks[i] = generateBishopMovesOnTheFly(square, occupancies[i])
+		} else {
+			attacks[i] = generateRookMovesOnTheFly(square, occupancies[i])
+		}
+	}
+
+	for randomCount := 0; randomCount < 100000000; randomCount++ {
+		magicNumber := generateMagicNumber()
+		var fail int
+		var usedAttacks [4096]uint64
+
+		if popCount((attackMask*magicNumber)&0xFF00000000000000) < 6 {
+			continue
+		}
+
+		for i := 0; fail == 0 && i < occupancyIndizes; i++ {
+			magicIndex := uint64((occupancies[i] * magicNumber) >> (64 - relevantBits))
+
+			if usedAttacks[magicIndex] == 0 {
+				usedAttacks[magicIndex] = attacks[i]
+			} else if usedAttacks[magicIndex] != attacks[i] {
+				fail = 1
+			}
+		}
+
+		if fail == 0 {
+			return magicNumber
+		}
+	}
+	return 0
 }
