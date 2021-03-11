@@ -10,6 +10,15 @@ var (
 	notABFile uint64 = 4557430888798830399
 	notGHFile uint64 = 18229723555195321596
 )
+var (
+	pawnAttacks   [2][64]uint64
+	knightAttacks [64]uint64
+	kingAttacks   [64]uint64
+	rookMasks     [64]uint64
+	bishopMasks   [64]uint64
+	bishopAttacks [64][512]uint64
+	rookAttacks   [64][4096]uint64
+)
 
 // maskPawnAttacks generates all possible attacks for pawns.
 func maskPawnAttacks() (pawnAttacks [2][64]uint64) {
@@ -442,5 +451,36 @@ func initLeaperAttacks() {
 	for i := 0; i < 64; i++ {
 		knightAttacks[i] = maskKnightMoves(i)
 		kingAttacks[i] = maskKingMoves(i)
+	}
+}
+
+// initSliderAttacks initializes the attack tables for the slider pieces.
+func initSliderAttacks(bishop bool) {
+	for i := 0; i < 64; i++ {
+		bishopMasks[i] = maskBishopMoves(i)
+		rookMasks[i] = maskRookMoves(i)
+		var attackMask uint64
+
+		if bishop {
+			attackMask = bishopMasks[i]
+		} else {
+			attackMask = rookMasks[i]
+		}
+		relevantBitsCount := popCount(attackMask)
+		occupancyIndizes := 1 << relevantBitsCount
+
+		for j := 0; j < occupancyIndizes; j++ {
+			if bishop {
+				occupancy := setOccupancy(relevantBitsCount, j, attackMask)
+				magicIndex := int((occupancy * magicNumbersBishop[i]) >> (64 - relevantBitsBishop[i]))
+
+				bishopAttacks[i][magicIndex] = generateBishopMovesOnTheFly(i, occupancy)
+			} else {
+				occupancy := setOccupancy(relevantBitsCount, j, attackMask)
+				magicIndex := int((occupancy * magicNumbersRook[i]) >> (64 - relevantBitsRook[i]))
+
+				rookAttacks[i][magicIndex] = generateRookMovesOnTheFly(i, occupancy)
+			}
+		}
 	}
 }
