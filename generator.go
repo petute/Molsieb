@@ -442,10 +442,7 @@ func initMagicNumbers() {
 
 // <<------------------------------- initMoves ------------------------------->>
 
-var pawnAttacks [2][64]uint64
-var knightAttacks [64]uint64
-var kingAttacks [64]uint64
-
+// initLeaperAttacks initializes the attack tables for the leaper pieces
 func initLeaperAttacks() {
 	pawnAttacks = maskPawnAttacks()
 	for i := 0; i < 64; i++ {
@@ -492,4 +489,13 @@ func getBishopAttacks(square int, occupancy uint64) uint64 {
 	occupancy >>= 64 - relevantBitsBishop[square]
 
 	return bishopAttacks[square][occupancy]
+}
+
+// getRookAttacks
+func getRookAttacks(square int, occupancy uint64) uint64 {
+	occupancy &= rookMasks[square]
+	occupancy *= magicNumbersRook[square]
+	occupancy >>= 64 - relevantBitsRook[square]
+
+	return rookAttacks[square][occupancy]
 }
