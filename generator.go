@@ -484,3 +484,12 @@ func initSliderAttacks(bishop bool) {
 		}
 	}
 }
+
+// getBishopAttacks
+func getBishopAttacks(square int, occupancy uint64) uint64 {
+	occupancy &= bishopMasks[square]
+	occupancy *= magicNumbersBishop[square]
+	occupancy >>= 64 - relevantBitsBishop[square]
+
+	return bishopAttacks[square][occupancy]
+}
