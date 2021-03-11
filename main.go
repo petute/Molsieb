@@ -23,6 +23,13 @@ func initPosition() {
 	position.white = 18446462598732840960
 }
 
+func initAll() {
+	initLeaperAttacks()
+	initSliderAttacks(true)
+	initSliderAttacks(false)
+	initPosition()
+}
+
 func main() {
 	var kingMoves = maskKingMoves()
 
