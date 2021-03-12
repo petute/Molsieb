@@ -12,6 +12,7 @@ var (
 )
 var (
 	pawnAttacks   [2][64]uint64
+	pawnMoves     [2][64]uint64
 	knightAttacks [64]uint64
 	kingAttacks   [64]uint64
 	rookMasks     [64]uint64
@@ -20,7 +21,7 @@ var (
 	rookAttacks   [64][4096]uint64
 )
 
-// maskPawnAttacks generates all possible attacks for pawns.
+// maskPawnAttacks generates all possible attacks for pawns. pawnAttacks[0][x] == white
 func maskPawnAttacks() (pawnAttacks [2][64]uint64) {
 	for i := 0; i < 64; i++ {
 		pawnAttacks[0][i] = setBit(0, i)
@@ -30,6 +31,24 @@ func maskPawnAttacks() (pawnAttacks [2][64]uint64) {
 		pawnAttacks[1][i] = (pawnAttacks[1][i]&notHFile)<<7 ^ (pawnAttacks[1][i]&notAFile)<<9
 	}
 	return pawnAttacks
+}
+
+// generatePawnMoves masks possible pawn moves. pawnMoves[0][x] == white
+func maskPawnMoves() (pawnMoves [2][64]uint64) {
+	for i := 0; i < 64; i++ {
+		pawnMoves[0][i] = setBit(0, i)
+		pawnMoves[0][i] >>= 8
+		if i/8 == 6 {
+			pawnMoves[0][i] |= pawnMoves[0][i] >> 8
+		}
+
+		pawnMoves[1][i] = setBit(0, i)
+		pawnMoves[1][i] <<= 8
+		if i/8 == 1 {
+			pawnMoves[1][i] |= pawnMoves[1][i] << 8
+		}
+	}
+	return pawnMoves
 }
 
 // maskKnightMoves generates all possible moves for knights.
@@ -428,7 +447,7 @@ func findMagicNumber(square, relevantBits int, bishop bool) uint64 {
 	return 0
 }
 
-// initMagicNumbers initalizes the magicnumbers.
+// initMagicNumbers initializes the magicnumbers.
 func initMagicNumbers() {
 	fmt.Println("rook")
 	for i := 0; i < 64; i++ {
@@ -445,6 +464,7 @@ func initMagicNumbers() {
 // initLeaperAttacks initializes the attack tables for the leaper pieces
 func initLeaperAttacks() {
 	pawnAttacks = maskPawnAttacks()
+	pawnMoves = maskPawnMoves()
 	for i := 0; i < 64; i++ {
 		knightAttacks[i] = maskKnightMoves(i)
 		kingAttacks[i] = maskKingMoves(i)
@@ -482,7 +502,7 @@ func initSliderAttacks(bishop bool) {
 	}
 }
 
-// getBishopAttacks
+// getBishopAttacks returns the attack for a square and occupancy.
 func getBishopAttacks(square int, occupancy uint64) uint64 {
 	occupancy &= bishopMasks[square]
 	occupancy *= magicNumbersBishop[square]
@@ -491,11 +511,16 @@ func getBishopAttacks(square int, occupancy uint64) uint64 {
 	return bishopAttacks[square][occupancy]
 }
 
-// getRookAttacks
+// getRookAttacks returns the attack for a square and occupancy.
 func getRookAttacks(square int, occupancy uint64) uint64 {
 	occupancy &= rookMasks[square]
 	occupancy *= magicNumbersRook[square]
 	occupancy >>= 64 - relevantBitsRook[square]
 
 	return rookAttacks[square][occupancy]
+}
+
+// moveGenerator generates all possible moves for one side.
+func moveGenerator(white bool) {
+
 }
