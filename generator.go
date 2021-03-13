@@ -193,6 +193,24 @@ func generateBishopMovesOnTheFly(square int, blockboard uint64) (bishopMoves uin
 	return bishopMoves
 }
 
+// getBishopAttacks returns the attack for a square and occupancy.
+func getBishopAttacks(square int, occupancy uint64) uint64 {
+	occupancy &= bishopMasks[square]
+	occupancy *= magicNumbersBishop[square]
+	occupancy >>= 64 - relevantBitsBishop[square]
+
+	return bishopAttacks[square][occupancy]
+}
+
+// getRookAttacks returns the attack for a square and occupancy.
+func getRookAttacks(square int, occupancy uint64) uint64 {
+	occupancy &= rookMasks[square]
+	occupancy *= magicNumbersRook[square]
+	occupancy >>= 64 - relevantBitsRook[square]
+
+	return rookAttacks[square][occupancy]
+}
+
 // <<--------------------------------- Magic --------------------------------->>
 
 // Amount oft relevant occupancy bits per square for the bishop.
@@ -502,25 +520,44 @@ func initSliderAttacks(bishop bool) {
 	}
 }
 
-// getBishopAttacks returns the attack for a square and occupancy.
-func getBishopAttacks(square int, occupancy uint64) uint64 {
-	occupancy &= bishopMasks[square]
-	occupancy *= magicNumbersBishop[square]
-	occupancy >>= 64 - relevantBitsBishop[square]
+// <<------------------------------- Generator ------------------------------->>
 
-	return bishopAttacks[square][occupancy]
-}
+// generatePseudoLegalPawnMoves generates all legal moves excluding checks.
+func generatePseudoLegalPawnMoves(white bool) (moves []uint64) {
+	var pawns uint64
+	var pawnCount int
 
-// getRookAttacks returns the attack for a square and occupancy.
-func getRookAttacks(square int, occupancy uint64) uint64 {
-	occupancy &= rookMasks[square]
-	occupancy *= magicNumbersRook[square]
-	occupancy >>= 64 - relevantBitsRook[square]
+	occupancy := position.black | position.white
 
-	return rookAttacks[square][occupancy]
-}
+	if white {
+		pawns = position.pawns & position.white
+		pawnCount = popCount(pawns)
+	} else {
+		pawns = position.pawns & position.black
+		pawnCount = popCount(pawns)
+	}
 
-// moveGenerator generates all possible moves for one side.
-func moveGenerator(white bool) {
+	moves = make([]uint64, pawnCount)
 
+	for i := 0; i < pawnCount; i++ {
+		var move uint64
+		square := getLS1BIndex(pawns)
+		pawns = popBit(pawns, square)
+
+		if white {
+			move = pawnMoves[0][square] &^ occupancy
+			if square/8 == 6 && move != pawnMoves[0][square] {
+				move &^= 1 << (square - 16)
+			}
+			move |= pawnAttacks[0][square] & position.black
+		} else {
+			move = pawnMoves[1][square] &^ occupancy
+			if square/8 == 1 && move != pawnMoves[1][square] {
+				move &^= occupancy & (1 >> (square + 16))
+			}
+			move |= pawnAttacks[1][square] & position.white
+		}
+		moves[i] = move
+	}
+	return moves
 }
