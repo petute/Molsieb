@@ -587,7 +587,7 @@ func getPseudoLegalMoves(white bool) (allMoves [6][]uint64) {
 		knights = position.white & position.knights
 		queens = position.white & position.queens
 		kingSquare = getLS1BIndex(position.kings & position.white)
-		pieceCount = popCount(position.white & (position.white &^ position.pawns))
+		pieceCount = popCount(position.white&(position.white&^position.pawns)) - 1
 	} else {
 		color = position.black
 		rooks = position.black & position.rooks
@@ -595,7 +595,7 @@ func getPseudoLegalMoves(white bool) (allMoves [6][]uint64) {
 		knights = position.black & position.knights
 		queens = position.black & position.queens
 		kingSquare = getLS1BIndex(position.kings & position.black)
-		pieceCount = popCount(position.black & (position.black &^ position.pawns))
+		pieceCount = popCount(position.black&(position.black&^position.pawns)) - 1
 	}
 
 	for pieceCount > 0 {
@@ -628,12 +628,9 @@ func getPseudoLegalMoves(white bool) (allMoves [6][]uint64) {
 			allMoves[4] = append(allMoves[4], (getRookAttacks(square, occupancy)&getBishopAttacks(square, occupancy))&^color)
 			count++
 		}
-		if kingSquare > 0 {
-			allMoves[5] = append(allMoves[5], kingAttacks[kingSquare]&^color)
-			kingSquare = 0
-			count++
-		}
 		pieceCount -= count
 	}
+	allMoves[5] = append(allMoves[5], kingAttacks[kingSquare]&^color)
+
 	return allMoves
 }
