@@ -566,7 +566,7 @@ func getRookAttacks(square int, occupancy uint64) uint64 {
 
 /* getPseudoLegalMoves returns a [6][]uint64 with all possible attacks.
 allMoves[0] == pawns, 1 == rooks, 2 == bishops, 3 == knights, 4 == queens, 5 == king */
-func getPseudoLegalMoves(white bool) (allMoves [6][]uint64) {
+func getPseudoLegalMoves(white bool) (allMoves []uint64) {
 	var (
 		pieceCount int
 		rooks      uint64
@@ -578,7 +578,7 @@ func getPseudoLegalMoves(white bool) (allMoves [6][]uint64) {
 		square     int
 	)
 	occupancy := position.white | position.black
-	allMoves[0] = getPseudoLegalPawnMoves(white)
+	allMoves = getPseudoLegalPawnMoves(white)
 
 	if white {
 		color = position.white
@@ -604,33 +604,33 @@ func getPseudoLegalMoves(white bool) (allMoves [6][]uint64) {
 			square = getLS1BIndex(rooks)
 			rooks = popBit(rooks, square)
 
-			allMoves[1] = append(allMoves[1], getRookAttacks(square, occupancy)&^color)
+			allMoves = append(allMoves, getRookAttacks(square, occupancy)&^color)
 			count++
 		}
 		if bishops > 0 {
 			square = getLS1BIndex(bishops)
 			bishops = popBit(bishops, square)
 
-			allMoves[2] = append(allMoves[2], getBishopAttacks(square, occupancy)&^color)
+			allMoves = append(allMoves, getBishopAttacks(square, occupancy)&^color)
 			count++
 		}
 		if knights > 0 {
 			square = getLS1BIndex(knights)
 			knights = popBit(knights, square)
 
-			allMoves[3] = append(allMoves[3], knightAttacks[square]&^color)
+			allMoves = append(allMoves, knightAttacks[square]&^color)
 			count++
 		}
 		if queens > 0 {
 			square = getLS1BIndex(queens)
 			queens = popBit(queens, square)
 
-			allMoves[4] = append(allMoves[4], (getRookAttacks(square, occupancy)&getBishopAttacks(square, occupancy))&^color)
+			allMoves = append(allMoves, (getRookAttacks(square, occupancy)&getBishopAttacks(square, occupancy))&^color)
 			count++
 		}
 		pieceCount -= count
 	}
-	allMoves[5] = append(allMoves[5], kingAttacks[kingSquare]&^color)
+	allMoves = append(allMoves, kingAttacks[kingSquare]&^color)
 
 	return allMoves
 }
