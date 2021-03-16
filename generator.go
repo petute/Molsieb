@@ -506,45 +506,13 @@ func initSliderAttacks(bishop bool) {
 
 // <<------------------------------- Generator ------------------------------->>
 
-// getPseudoLegalPawnMoves generates all legal moves excluding checks and en passant.
-func getPseudoLegalPawnMoves(white bool) (moves []uint64) {
-	var pawns uint64
-	var pawnCount int
-
-	occupancy := position.black | position.white
-
-	if white {
-		pawns = position.pawns & position.white
-		pawnCount = popCount(pawns)
-	} else {
-		pawns = position.pawns & position.black
-		pawnCount = popCount(pawns)
-	}
-
-	moves = make([]uint64, pawnCount)
-
-	for i := 0; i < pawnCount; i++ {
-		var move uint64
-		square := getLS1BIndex(pawns)
-		pawns = popBit(pawns, square)
-
-		if white {
-			move = pawnMoves[0][square] &^ occupancy
-			if square/8 == 6 && move != pawnMoves[0][square] {
-				move &^= 1 << (square - 16)
-			}
-			move |= pawnAttacks[0][square] & position.black
-		} else {
-			move = pawnMoves[1][square] &^ occupancy
-			if square/8 == 1 && move != pawnMoves[1][square] {
-				move &^= occupancy & (1 >> (square + 16))
-			}
-			move |= pawnAttacks[1][square] & position.white
-		}
-		moves[i] = move
-	}
-	return moves
+type move struct {
+	fromSquare int
+	toSquare   int
+	pieceType  string
 }
+
+var moveList []move
 
 // getBishopAttacks returns the attack for a square and occupancy.
 func getBishopAttacks(square int, occupancy uint64) uint64 {
@@ -564,11 +532,21 @@ func getRookAttacks(square int, occupancy uint64) uint64 {
 	return rookAttacks[square][occupancy]
 }
 
+// convertMoves converts the moves from bitboards to move type.
+func convertMoves(square int, bitboard uint64, pieceType string) {
+	for bitboard > 0 {
+		toSquare := getLS1BIndex(bitboard)
+		moveList = append(moveList, move{fromSquare: square, toSquare: toSquare, pieceType: pieceType})
+		bitboard = popBit(bitboard, toSquare)
+	}
+}
+
 /* getPseudoLegalMoves returns a [6][]uint64 with all possible attacks.
 allMoves[0] == pawns, 1 == rooks, 2 == bishops, 3 == knights, 4 == queens, 5 == king */
-func getPseudoLegalMoves(white bool) (allMoves []uint64) {
+func getPseudoLegalMoves(white bool) {
 	var (
 		pieceCount int
+		pawns      uint64
 		rooks      uint64
 		bishops    uint64
 		knights    uint64
@@ -578,59 +556,79 @@ func getPseudoLegalMoves(white bool) (allMoves []uint64) {
 		square     int
 	)
 	occupancy := position.white | position.black
-	allMoves = getPseudoLegalPawnMoves(white)
-
 	if white {
 		color = position.white
+		pawns = position.white & position.pawns
 		rooks = position.white & position.rooks
 		bishops = position.white & position.bishops
 		knights = position.white & position.knights
 		queens = position.white & position.queens
 		kingSquare = getLS1BIndex(position.kings & position.white)
-		pieceCount = popCount(position.white&(position.white&^position.pawns)) - 1
+		pieceCount = popCount(position.white) - 1
 	} else {
 		color = position.black
+		pawns = position.black & position.pawns
 		rooks = position.black & position.rooks
 		bishops = position.black & position.bishops
 		knights = position.black & position.knights
 		queens = position.black & position.queens
 		kingSquare = getLS1BIndex(position.kings & position.black)
-		pieceCount = popCount(position.black&(position.black&^position.pawns)) - 1
+		pieceCount = popCount(position.black) - 1
 	}
 
 	for pieceCount > 0 {
 		count := 0
+		if pawns > 0 {
+			var move uint64
+			square = getLS1BIndex(pawns)
+			pawns = popBit(pawns, square)
+
+			if white {
+				move = pawnMoves[0][square] &^ occupancy
+				if square/8 == 6 && move != pawnMoves[0][square] {
+					move &^= 1 << (square - 16)
+				}
+				move |= pawnAttacks[0][square] & position.black
+			} else {
+				move = pawnMoves[1][square] &^ occupancy
+				if square/8 == 1 && move != pawnMoves[1][square] {
+					move &^= occupancy & (1 >> (square + 16))
+				}
+				move |= pawnAttacks[1][square] & position.white
+			}
+
+			convertMoves(square, move, "pawn")
+			count++
+		}
 		if rooks > 0 {
 			square = getLS1BIndex(rooks)
 			rooks = popBit(rooks, square)
 
-			allMoves = append(allMoves, getRookAttacks(square, occupancy)&^color)
+			convertMoves(square, getRookAttacks(square, occupancy)&^color, "rook")
 			count++
 		}
 		if bishops > 0 {
 			square = getLS1BIndex(bishops)
 			bishops = popBit(bishops, square)
 
-			allMoves = append(allMoves, getBishopAttacks(square, occupancy)&^color)
+			convertMoves(square, getBishopAttacks(square, occupancy)&^color, "bishop")
 			count++
 		}
 		if knights > 0 {
 			square = getLS1BIndex(knights)
 			knights = popBit(knights, square)
 
-			allMoves = append(allMoves, knightAttacks[square]&^color)
+			convertMoves(square, knightAttacks[square]&^color, "knight")
 			count++
 		}
 		if queens > 0 {
 			square = getLS1BIndex(queens)
 			queens = popBit(queens, square)
 
-			allMoves = append(allMoves, (getRookAttacks(square, occupancy)&getBishopAttacks(square, occupancy))&^color)
+			convertMoves(square, (getRookAttacks(square, occupancy)&getBishopAttacks(square, occupancy))&^color, "queen")
 			count++
 		}
 		pieceCount -= count
 	}
-	allMoves = append(allMoves, kingAttacks[kingSquare]&^color)
-
-	return allMoves
+	convertMoves(kingSquare, kingAttacks[kingSquare]&^color, "king")
 }

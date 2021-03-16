@@ -57,10 +57,13 @@ func parseFenString(fen string) {
 			position.castle += 8
 		}
 	}
-	/* TODO: implement en-passant mechanism and then parse groups[3] here.
-	Also implement 50 move rule with groups[4] */
+	/* TODO: implement en-passant mechanism and then parse groups[3] here.*/
 
-	if i, err := strconv.Atoi(groups[5]); err == nil {
-		position.moveNumber = i
+	if value, err := strconv.Atoi(groups[4]); err == nil {
+		position.moveRule = value
+	}
+
+	if value, err := strconv.Atoi(groups[5]); err == nil {
+		position.moveNumber = value
 	}
 }
