@@ -54,4 +54,13 @@ func main() {
 	printBitboard(p.white | p.black)
 	printBitboard(p.enPassant)
 	printBitboard(p.pawns)
+
+	position = p
+
+	moveList = getPseudoLegalMoves(false)
+	p = makeMove(moveList[0], false, position)
+
+	printBitboard(p.white | p.black)
+	printBitboard(p.enPassant)
+	printBitboard(p.pawns)
 }

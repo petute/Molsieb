@@ -638,6 +638,7 @@ func getPseudoLegalMoves(white bool) (moveList []move) {
 // makeMove makes a move and en-passant. TODO: Check for checks.
 func makeMove(move move, white bool, position pos) pos {
 	var capture bool
+
 	if white {
 		position.white = popBit(position.white, move.fromSquare)
 		if getBit(position.black, move.toSquare) != 0 {
@@ -645,7 +646,7 @@ func makeMove(move move, white bool, position pos) pos {
 			position.black = popBit(position.black, move.toSquare)
 		}
 		position.white = setBit(position.white, move.toSquare)
-		position.enPassant = position.enPassant &^ 0xFF0000000000
+		position.enPassant = position.enPassant &^ 0xFF0000
 	} else {
 		position.black = popBit(position.black, move.fromSquare)
 		if getBit(position.white, move.toSquare) != 0 {
@@ -653,7 +654,7 @@ func makeMove(move move, white bool, position pos) pos {
 			position.white = popBit(position.white, move.toSquare)
 		}
 		position.black = setBit(position.black, move.toSquare)
-		position.enPassant = position.enPassant &^ 0xFF0000
+		position.enPassant = position.enPassant &^ 0xFF0000000000
 	}
 
 	if move.pieceType == "pawn" && move.toSquare-move.fromSquare == 16 {
@@ -675,6 +676,7 @@ func makeMove(move move, white bool, position pos) pos {
 			position.queens = popBit(position.queens, move.toSquare)
 		}
 	}
+
 	switch move.pieceType {
 	case "pawn":
 		position.pawns = popBit(position.pawns, move.fromSquare)
@@ -695,5 +697,6 @@ func makeMove(move move, white bool, position pos) pos {
 		position.kings = popBit(position.kings, move.fromSquare)
 		position.kings = setBit(position.kings, move.toSquare)
 	}
+
 	return position
 }
