@@ -45,8 +45,8 @@ func parseFenString(fen string) {
 		position.color = false
 	}
 	castle := []rune(groups[2])
-	for _, char := range castle {
-		switch char {
+	for _, ascii := range castle {
+		switch ascii {
 		case 75:
 			position.castle++
 		case 81:

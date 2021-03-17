@@ -541,8 +541,7 @@ func convertMoves(square int, bitboard uint64, pieceType string) (moveList []mov
 	return moveList
 }
 
-/* getPseudoLegalMoves returns a [6][]uint64 with all possible attacks.
-allMoves[0] == pawns, 1 == rooks, 2 == bishops, 3 == knights, 4 == queens, 5 == king */
+// getPseudoLegalMoves returns a []move with all possible attacks.
 func getPseudoLegalMoves(white bool) (moveList []move) {
 	moveList = make([]move, 0, 35)
 	var (
@@ -589,13 +588,13 @@ func getPseudoLegalMoves(white bool) (moveList []move) {
 				if square/8 == 6 && move != pawnMoves[0][square] {
 					move &^= 1 << (square - 16)
 				}
-				move |= pawnAttacks[0][square] & position.black
+				move |= pawnAttacks[0][square] & (position.black | (position.enPassant & 0xFF0000))
 			} else {
 				move = pawnMoves[1][square] &^ occupancy
 				if square/8 == 1 && move != pawnMoves[1][square] {
 					move &^= occupancy & (1 >> (square + 16))
 				}
-				move |= pawnAttacks[1][square] & position.white
+				move |= pawnAttacks[1][square] & (position.white | (position.enPassant & 0xFF0000000000))
 			}
 
 			moveList = append(moveList, convertMoves(square, move, "pawn")...)
@@ -634,4 +633,67 @@ func getPseudoLegalMoves(white bool) (moveList []move) {
 	moveList = append(moveList, convertMoves(kingSquare, kingAttacks[kingSquare]&^color, "king")...)
 
 	return moveList
+}
+
+// makeMove makes a move and en-passant. TODO: Check for checks.
+func makeMove(move move, white bool, position pos) pos {
+	var capture bool
+	if white {
+		position.white = popBit(position.white, move.fromSquare)
+		if getBit(position.black, move.toSquare) != 0 {
+			capture = true
+			position.black = popBit(position.black, move.toSquare)
+		}
+		position.white = setBit(position.white, move.toSquare)
+		position.enPassant = position.enPassant &^ 0xFF0000000000
+	} else {
+		position.black = popBit(position.black, move.fromSquare)
+		if getBit(position.white, move.toSquare) != 0 {
+			capture = true
+			position.white = popBit(position.white, move.toSquare)
+		}
+		position.black = setBit(position.black, move.toSquare)
+		position.enPassant = position.enPassant &^ 0xFF0000
+	}
+
+	if move.pieceType == "pawn" && move.toSquare-move.fromSquare == 16 {
+		position.enPassant = setBit(position.enPassant, move.fromSquare+8)
+	} else if move.pieceType == "pawn" && move.fromSquare-move.toSquare == 16 {
+		position.enPassant = setBit(position.enPassant, move.fromSquare-8)
+	}
+
+	if capture {
+		if getBit(position.pawns, move.toSquare) == 1 {
+			position.queens = popBit(position.pawns, move.toSquare)
+		} else if getBit(position.rooks, move.toSquare) == 1 {
+			position.rooks = popBit(position.rooks, move.toSquare)
+		} else if getBit(position.knights, move.toSquare) == 1 {
+			position.knights = popBit(position.knights, move.toSquare)
+		} else if getBit(position.bishops, move.toSquare) == 1 {
+			position.bishops = popBit(position.bishops, move.toSquare)
+		} else if getBit(position.queens, move.toSquare) == 1 {
+			position.queens = popBit(position.queens, move.toSquare)
+		}
+	}
+	switch move.pieceType {
+	case "pawn":
+		position.pawns = popBit(position.pawns, move.fromSquare)
+		position.pawns = setBit(position.pawns, move.toSquare)
+	case "bishop":
+		position.bishops = popBit(position.bishops, move.fromSquare)
+		position.bishops = setBit(position.bishops, move.toSquare)
+	case "knight":
+		position.knights = popBit(position.knights, move.fromSquare)
+		position.knights = setBit(position.knights, move.toSquare)
+	case "rook":
+		position.rooks = popBit(position.rooks, move.fromSquare)
+		position.rooks = setBit(position.rooks, move.toSquare)
+	case "queen":
+		position.queens = popBit(position.queens, move.fromSquare)
+		position.queens = setBit(position.queens, move.toSquare)
+	case "king":
+		position.kings = popBit(position.kings, move.fromSquare)
+		position.kings = setBit(position.kings, move.toSquare)
+	}
+	return position
 }
