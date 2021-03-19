@@ -12,6 +12,6 @@ func countMaterial(color uint64) (mat int) {
 }
 
 // evaluate evaluates the position.
-func evaluate() int {
+func evaluate(position pos) int {
 	return countMaterial(position.white) - countMaterial(position.black)
 }

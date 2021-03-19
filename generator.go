@@ -614,8 +614,10 @@ func getAttackMap(white bool, occupancy uint64) uint64 {
 	return attacks
 }
 
-// getPseudoLegalMoves returns a []move with all possible attacks.
-func getPseudoLegalMoves(white bool) (moveList []move) {
+// getLegalMoves returns a []move with all possible attacks.
+func getLegalMoves(white bool) (moveList []move) {
+	printBitboard(position.enPassant)
+
 	moveList = make([]move, 0, 35)
 	var (
 		color uint64
@@ -720,12 +722,16 @@ func getPseudoLegalMoves(white bool) (moveList []move) {
 // makeMove makes a move and en-passant. TODO: Check for checks.
 func makeMove(move move, white bool, position pos) pos {
 	var capture bool
-
 	if white {
 		position.white = popBit(position.white, move.fromSquare)
 		if getBit(position.black, move.toSquare) != 0 {
 			capture = true
 			position.black = popBit(position.black, move.toSquare)
+		} else if getBit(position.enPassant, move.toSquare) != 0 {
+			capture = true
+			position.black = popBit(position.black, move.toSquare+8)
+			position.pawns = popBit(position.pawns, move.toSquare+8)
+
 		}
 		position.white = setBit(position.white, move.toSquare)
 		position.enPassant = position.enPassant &^ 0xFF0000
@@ -736,6 +742,10 @@ func makeMove(move move, white bool, position pos) pos {
 		if getBit(position.white, move.toSquare) != 0 {
 			capture = true
 			position.white = popBit(position.white, move.toSquare)
+		} else if getBit(position.enPassant, move.toSquare) != 0 {
+			capture = true
+			position.white = popBit(position.white, move.toSquare-8)
+			position.pawns = popBit(position.pawns, move.toSquare-8)
 		}
 		position.black = setBit(position.black, move.toSquare)
 		position.enPassant = position.enPassant &^ 0xFF0000000000
