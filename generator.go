@@ -647,6 +647,7 @@ func makeMove(move move, white bool, position pos) pos {
 		}
 		position.white = setBit(position.white, move.toSquare)
 		position.enPassant = position.enPassant &^ 0xFF0000
+		position.moveNumber++
 	} else {
 		position.black = popBit(position.black, move.fromSquare)
 		if getBit(position.white, move.toSquare) != 0 {
@@ -664,8 +665,9 @@ func makeMove(move move, white bool, position pos) pos {
 	}
 
 	if capture {
+		position.moveRule = 0
 		if getBit(position.pawns, move.toSquare) == 1 {
-			position.queens = popBit(position.pawns, move.toSquare)
+			position.pawns = popBit(position.pawns, move.toSquare)
 		} else if getBit(position.rooks, move.toSquare) == 1 {
 			position.rooks = popBit(position.rooks, move.toSquare)
 		} else if getBit(position.knights, move.toSquare) == 1 {
@@ -675,6 +677,8 @@ func makeMove(move move, white bool, position pos) pos {
 		} else if getBit(position.queens, move.toSquare) == 1 {
 			position.queens = popBit(position.queens, move.toSquare)
 		}
+	} else {
+		position.moveRule++
 	}
 
 	switch move.pieceType {
