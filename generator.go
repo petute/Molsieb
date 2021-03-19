@@ -634,6 +634,7 @@ func getPseudoLegalMoves(white bool) (moveList []move) {
 	bishops := color & position.bishops
 	queens := color & position.queens
 	kings := color & position.kings
+	attacks := getAttackMap(!white, occupancy)
 
 	for pieceCount > 0 {
 		count := 0
@@ -691,12 +692,28 @@ func getPseudoLegalMoves(white bool) (moveList []move) {
 			square := getLS1BIndex(kings)
 			kings = popBit(kings, square)
 
-			moveList = append(moveList, convertMoves(square, kingAttacks[square]&^color, "king")...)
+			moveList = append(moveList, convertMoves(square, (kingAttacks[square]&^color)&^attacks, "king")...)
 			count++
 		}
 		pieceCount -= count
 	}
 
+	if getBit(attacks, getLS1BIndex(color&position.kings)) == 1 {
+		var checkMoves []move
+		for _, move := range moveList {
+			if move.pieceType == "king" {
+				checkMoves = append(checkMoves, move)
+			} else if getBit(attacks, move.toSquare) == 1 {
+				test := setBit(occupancy, move.toSquare)
+				test = popBit(test, move.fromSquare)
+				tAttack := getAttackMap(!white, test)
+				if getBit(tAttack, getLS1BIndex(color&position.kings)) != 1 {
+					checkMoves = append(checkMoves, move)
+				}
+			}
+		}
+		moveList = checkMoves
+	}
 	return moveList
 }
 
