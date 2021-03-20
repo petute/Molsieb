@@ -616,8 +616,6 @@ func getAttackMap(white bool, occupancy uint64) uint64 {
 
 // getLegalMoves returns a []move with all possible attacks.
 func getLegalMoves(white bool) (moveList []move) {
-	printBitboard(position.enPassant)
-
 	moveList = make([]move, 0, 35)
 	var (
 		color uint64

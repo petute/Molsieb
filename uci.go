@@ -61,23 +61,8 @@ func parseFenString(fen string) {
 	if groups[3] != "-" {
 		square := 0
 		ascii := []rune(groups[3])
-		switch ascii[0] {
-		case 97:
-			square = 7
-		case 98:
-			square = 6
-		case 99:
-			square = 5
-		case 100:
-			square = 4
-		case 101:
-			square = 3
-		case 102:
-			square = 2
-		case 103:
-			square = 1
-		}
-		square = square*8 + (int(ascii[1]) - 49)
+
+		square = (-int(ascii[0])+104)*8 + (int(ascii[1]) - 49)
 		position.enPassant = setBit(position.enPassant, square)
 	}
 
