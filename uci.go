@@ -13,11 +13,11 @@ func parseFenString(groups []string) {
 	for _, row := range positionStr {
 		runes := []rune(row)
 		for _, ascii := range runes {
-			if ascii > 65 && ascii < 98 {
-				position.white = setBit(position.white, square)
-			} else if ascii > 97 {
-				ascii -= 32
+			if ascii > 97 {
 				position.black = setBit(position.black, square)
+				ascii -= 32
+			} else if ascii > 65 {
+				position.white = setBit(position.white, square)
 			}
 			switch ascii {
 			case 66:
@@ -77,32 +77,22 @@ func parseFenString(groups []string) {
 }
 
 // uciIn processes the UCI commands sent by the GUI.
-func uciIn(in string) {
+func uci(in string) {
 	slice := strings.Split(in, " ")
-
-	quit := false
-	for !quit {
-		switch slice[0] {
-		case "uci":
-			fmt.Println("id name Molsieb 0.1")
-			fmt.Println("id author Daniel Petutschnigg")
-			fmt.Println("uciok")
-		case "debug":
-			fmt.Println("This command is not yet implemented")
-		case "position":
-			handlePosition(slice[1:])
-		case "go":
-
-		case "isready":
-		case "register":
-		case "quit", "q":
-			quit = true
-		default:
-			fmt.Println("This command is not implemented")
-		}
+	switch slice[0] {
+	case "uci":
+		fmt.Println("id name Molsieb 0.1")
+		fmt.Println("id author Petute DP")
+		fmt.Println("uciok")
+	case "position":
+		handlePosition(slice[1:])
+	case "go":
+	default:
+		fmt.Println("This command is not implemented")
 	}
 }
 
+// handlePosition handles the UCI position command.
 func handlePosition(slice []string) {
 	if slice[0] == "startpos" {
 		position.pawns = 71776119061282560
@@ -118,7 +108,6 @@ func handlePosition(slice []string) {
 		position.moveRule = 0
 		position.color = true
 	} else {
-		fmt.Println(slice[1:7])
 		parseFenString(slice[1:7])
 	}
 	if len(slice) > 8 && slice[7] == "moves" {
@@ -134,6 +123,7 @@ func handlePosition(slice []string) {
 	}
 }
 
+// getMoveFromString converts a string to a move.
 func getMoveFromString(m string) move {
 	var mov move
 	ascii := []rune(m)
