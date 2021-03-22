@@ -6,8 +6,7 @@ import (
 )
 
 // parseFENString sets a position from a FENstring
-func parseFenString(fen string) {
-	groups := strings.Split(fen, " ")
+func parseFenString(groups []string) {
 	positionStr := strings.Split(groups[0], "/")
 	square := 0
 	for _, row := range positionStr {
@@ -62,7 +61,7 @@ func parseFenString(fen string) {
 		square := 0
 		ascii := []rune(groups[3])
 
-		square = (-int(ascii[0])+104)*8 + (int(ascii[1]) - 49)
+		square = (int(ascii[0]) - 97) + (-int(ascii[1]-56))*8
 		position.enPassant = setBit(position.enPassant, square)
 	}
 
@@ -73,4 +72,26 @@ func parseFenString(fen string) {
 	if value, err := strconv.Atoi(groups[5]); err == nil {
 		position.moveNumber = value
 	}
+}
+
+func getMoveFromString(m string) move {
+	var mov move
+	ascii := []rune(m)
+
+	mov.fromSquare = (int(ascii[0]) - 97) + (-int(ascii[1]-56))*8
+	mov.toSquare = (int(ascii[2]) - 97) + (-int(ascii[3]-56))*8
+	if getBit(position.pawns, mov.fromSquare) == 1 {
+		mov.pieceType = "pawn"
+	} else if getBit(position.bishops, mov.fromSquare) == 1 {
+		mov.pieceType = "bishop"
+	} else if getBit(position.knights, mov.fromSquare) == 1 {
+		mov.pieceType = "knight"
+	} else if getBit(position.rooks, mov.fromSquare) == 1 {
+		mov.pieceType = "rook"
+	} else if getBit(position.queens, mov.fromSquare) == 1 {
+		mov.pieceType = "queen"
+	} else if getBit(position.kings, mov.fromSquare) == 1 {
+		mov.pieceType = "king"
+	}
+	return mov
 }
