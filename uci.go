@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -38,6 +39,7 @@ func parseFenString(groups []string) {
 			square++
 		}
 	}
+
 	if groups[1] == "w" {
 		position.color = true
 	} else {
@@ -71,6 +73,64 @@ func parseFenString(groups []string) {
 
 	if value, err := strconv.Atoi(groups[5]); err == nil {
 		position.moveNumber = value
+	}
+}
+
+// uciIn processes the UCI commands sent by the GUI.
+func uciIn(in string) {
+	slice := strings.Split(in, " ")
+
+	quit := false
+	for !quit {
+		switch slice[0] {
+		case "uci":
+			fmt.Println("id name Molsieb 0.1")
+			fmt.Println("id author Daniel Petutschnigg")
+			fmt.Println("uciok")
+		case "debug":
+			fmt.Println("This command is not yet implemented")
+		case "position":
+			handlePosition(slice[1:])
+		case "go":
+
+		case "isready":
+		case "register":
+		case "quit", "q":
+			quit = true
+		default:
+			fmt.Println("This command is not implemented")
+		}
+	}
+}
+
+func handlePosition(slice []string) {
+	if slice[0] == "startpos" {
+		position.pawns = 71776119061282560
+		position.knights = 4755801206503243842
+		position.bishops = 2594073385365405732
+		position.rooks = 9295429630892703873
+		position.kings = 1152921504606846992
+		position.queens = 576460752303423496
+		position.black = 65535
+		position.white = 18446462598732840960
+		position.castle = 15
+		position.moveNumber = 0
+		position.moveRule = 0
+		position.color = true
+	} else {
+		fmt.Println(slice[1:7])
+		parseFenString(slice[1:7])
+	}
+	if len(slice) > 8 && slice[7] == "moves" {
+		for _, m := range slice[8:] {
+			mov := getMoveFromString(m)
+			position = makeMove(mov, position)
+		}
+	} else if len(slice) > 2 && slice[1] == "moves" {
+		for _, m := range slice[2:] {
+			mov := getMoveFromString(m)
+			position = makeMove(mov, position)
+		}
 	}
 }
 
