@@ -9,8 +9,8 @@ func search(white bool) move {
 	max := -100
 	var index int
 	for i, move := range moveList {
-		p := makeMove(move, white, position)
-		score[i] = negamax(p, 2, white)
+		p := makeMove(move, position)
+		score[i] = negamax(p, 2)
 		if score[i] > max {
 			max = score[i]
 			index = i
@@ -22,15 +22,15 @@ func search(white bool) move {
 }
 
 // negamax is my implementation of the negamax algorithm.
-func negamax(position pos, depth int, white bool) int {
-	moveList := getLegalMoves(white)
+func negamax(position pos, depth int) int {
+	moveList := getLegalMoves(position.color)
 	if depth == 0 || moveList == nil {
 		return evaluate(position)
 	}
 	max := -100
 	for _, move := range moveList {
-		p := makeMove(move, white, position)
-		value := -negamax(p, depth-1, !white)
+		p := makeMove(move, position)
+		value := -negamax(p, depth-1)
 
 		if value > max {
 			max = value

@@ -714,13 +714,16 @@ func getLegalMoves(white bool) (moveList []move) {
 		}
 		moveList = checkMoves
 	}
+
+	// TODO generate castling moves
+
 	return moveList
 }
 
 // makeMove makes a move and en-passant. TODO: Check for checks.
-func makeMove(move move, white bool, position pos) pos {
+func makeMove(move move, position pos) pos {
 	var capture bool
-	if white {
+	if position.color {
 		position.white = popBit(position.white, move.fromSquare)
 		if getBit(position.black, move.toSquare) != 0 {
 			capture = true
@@ -770,6 +773,8 @@ func makeMove(move move, white bool, position pos) pos {
 		}
 	}
 
+	//TODO implement castling
+
 	switch move.pieceType {
 	case "pawn":
 		position.pawns = popBit(position.pawns, move.fromSquare)
@@ -791,5 +796,6 @@ func makeMove(move move, white bool, position pos) pos {
 		position.kings = setBit(position.kings, move.toSquare)
 	}
 
+	position.color = !position.color
 	return position
 }
