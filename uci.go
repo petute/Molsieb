@@ -6,6 +6,29 @@ import (
 	"strings"
 )
 
+// getMoveFromString converts a string to a move.
+func getMoveFromString(m string) move {
+	var mov move
+	ascii := []rune(m)
+
+	mov.fromSquare = (int(ascii[0]) - 97) + (-int(ascii[1]-56))*8
+	mov.toSquare = (int(ascii[2]) - 97) + (-int(ascii[3]-56))*8
+	if getBit(position.pawns, mov.fromSquare) == 1 {
+		mov.pieceType = "pawn"
+	} else if getBit(position.bishops, mov.fromSquare) == 1 {
+		mov.pieceType = "bishop"
+	} else if getBit(position.knights, mov.fromSquare) == 1 {
+		mov.pieceType = "knight"
+	} else if getBit(position.rooks, mov.fromSquare) == 1 {
+		mov.pieceType = "rook"
+	} else if getBit(position.queens, mov.fromSquare) == 1 {
+		mov.pieceType = "queen"
+	} else if getBit(position.kings, mov.fromSquare) == 1 {
+		mov.pieceType = "king"
+	}
+	return mov
+}
+
 // parseFENString sets a position from a FENstring
 func parseFenString(groups []string) {
 	positionStr := strings.Split(groups[0], "/")
@@ -81,14 +104,18 @@ func uci(in string) {
 	slice := strings.Split(in, " ")
 	switch slice[0] {
 	case "uci":
-		fmt.Println("id name Molsieb 0.1")
-		fmt.Println("id author Petute DP")
+		fmt.Println("id name Molsieb")
+		fmt.Println("id author Petute")
 		fmt.Println("uciok")
 	case "position":
 		handlePosition(slice[1:])
 	case "go":
+		stopSearch = false
+		handleGo(slice[1:])
+	case "stop":
+		stopSearch = true
 	default:
-		fmt.Println("This command is not implemented")
+		fmt.Println("This command is not implemented.")
 	}
 }
 
@@ -107,7 +134,7 @@ func handlePosition(slice []string) {
 		position.moveNumber = 0
 		position.moveRule = 0
 		position.color = true
-	} else {
+	} else if slice[0] == "fen" {
 		parseFenString(slice[1:7])
 	}
 	if len(slice) > 8 && slice[7] == "moves" {
@@ -123,25 +150,42 @@ func handlePosition(slice []string) {
 	}
 }
 
-// getMoveFromString converts a string to a move.
-func getMoveFromString(m string) move {
-	var mov move
-	ascii := []rune(m)
-
-	mov.fromSquare = (int(ascii[0]) - 97) + (-int(ascii[1]-56))*8
-	mov.toSquare = (int(ascii[2]) - 97) + (-int(ascii[3]-56))*8
-	if getBit(position.pawns, mov.fromSquare) == 1 {
-		mov.pieceType = "pawn"
-	} else if getBit(position.bishops, mov.fromSquare) == 1 {
-		mov.pieceType = "bishop"
-	} else if getBit(position.knights, mov.fromSquare) == 1 {
-		mov.pieceType = "knight"
-	} else if getBit(position.rooks, mov.fromSquare) == 1 {
-		mov.pieceType = "rook"
-	} else if getBit(position.queens, mov.fromSquare) == 1 {
-		mov.pieceType = "queen"
-	} else if getBit(position.kings, mov.fromSquare) == 1 {
-		mov.pieceType = "king"
+// handleGo handles the UCI go command.
+func handleGo(slice []string) {
+	for len(slice) >= 1 {
+		c := 1
+		switch slice[0] {
+		case "wtime":
+			if wtime, err := strconv.ParseFloat(slice[1], 64); err == nil {
+				game.wtime = wtime
+			}
+			c++
+		case "btime":
+			if btime, err := strconv.ParseFloat(slice[1], 64); err == nil {
+				game.btime = btime
+			}
+			c++
+		case "winc":
+			if winc, err := strconv.ParseFloat(slice[1], 64); err == nil {
+				game.winc = winc
+			}
+			c++
+		case "binc":
+			if binc, err := strconv.ParseFloat(slice[1], 64); err == nil {
+				game.binc = binc
+			}
+			c++
+		case "depth":
+			if d, err := strconv.Atoi(slice[1]); err == nil {
+				depth = d
+			}
+			c++
+		case "infinite":
+			depth = 100
+		default:
+			fmt.Println("This command is not implemented.")
+		}
+		slice = slice[c:]
 	}
-	return mov
+	fmt.Println(search())
 }

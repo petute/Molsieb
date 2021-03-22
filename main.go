@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type pos struct {
 	pawns      uint64
@@ -18,6 +20,13 @@ type pos struct {
 	color      bool
 }
 
+var game struct {
+	wtime float64
+	btime float64
+	winc  float64
+	binc  float64
+}
+
 var position pos
 
 func initAll() {
@@ -27,7 +36,8 @@ func initAll() {
 }
 
 func main() {
-	uci("position startpos moves e4")
-	printBitboard(position.pawns | position.white)
-	fmt.Printf("%#v", position)
+	initAll()
+	uci("position startpos")
+	uci("go wtime 10 btime 10 winc 5 binc 5 depth 4")
+	fmt.Printf("%v %d", game, depth)
 }
