@@ -29,6 +29,16 @@ func getMoveFromString(m string) move {
 	return mov
 }
 
+// getStringFromMove converts a move to a stream.
+func getStringFromMove(mov move) string {
+	fromRank := 8 - mov.fromSquare/8
+	fromFile := rune(97 + mov.fromSquare%8)
+	toRank := 8 - mov.toSquare/8
+	toFile := rune(97 + mov.toSquare%8)
+
+	return fmt.Sprintf("%s%d%s%d", string(fromFile), fromRank, string(toFile), toRank)
+}
+
 // parseFENString sets a position from a FENstring
 func parseFenString(groups []string) {
 	positionStr := strings.Split(groups[0], "/")
@@ -101,6 +111,7 @@ func parseFenString(groups []string) {
 
 // uciIn processes the UCI commands sent by the GUI.
 func uci(in string) {
+	println(in)
 	slice := strings.Split(in, " ")
 	switch slice[0] {
 	case "uci":
@@ -187,5 +198,5 @@ func handleGo(slice []string) {
 		}
 		slice = slice[c:]
 	}
-	fmt.Println(search())
+	fmt.Println(getStringFromMove(search()))
 }
