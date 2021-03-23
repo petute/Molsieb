@@ -796,6 +796,13 @@ func makeMove(move move, position pos) pos {
 		position.kings = setBit(position.kings, move.toSquare)
 	}
 
+	// TODO: add promotion to other pieces
+	if move.pieceType == "pawn" && (move.toSquare/8 < 8 || move.toSquare/8 > 55) {
+		move.pieceType = "queen"
+		position.pawns = popBit(position.pawns, move.toSquare)
+		position.queens = setBit(position.queens, move.toSquare)
+	}
+
 	position.color = !position.color
 	return position
 }
