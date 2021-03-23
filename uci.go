@@ -36,6 +36,10 @@ func getStringFromMove(mov move) string {
 	toRank := 8 - mov.toSquare/8
 	toFile := rune(97 + mov.toSquare%8)
 
+	if (toRank == 8 || toRank == 1) && mov.pieceType == "pawn" {
+		return fmt.Sprintf("%s%d%s%dq", string(fromFile), fromRank, string(toFile), toRank)
+	}
+
 	return fmt.Sprintf("%s%d%s%d", string(fromFile), fromRank, string(toFile), toRank)
 }
 
